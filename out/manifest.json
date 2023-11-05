@@ -1,22 +1,26 @@
 {
   "manifest_version": 3,
-  "name": "NEXT-CHROME-STARTER",
+  "name": "Tabhive",
   "short_name": "N-C-S",
   "version": "0.0.1",
-  "description": "Next.js Chrome Extension Starter, Demo Example by ibnzUK. https://github.com/ibnzUK/next-chrome-starter",
+  "description": "Tab manager for your browser",
   "icons": {
     "16": "/icons/icon16.png",
     "32": "/icons/icon32.png",
     "48": "/icons/icon48.png",
     "192": "/icons/icon192.png"
   },
-  "permissions": [],
+  "permissions": ["sidePanel", "tabs"],
   "web_accessible_resources": [
     {
       "resources": ["index.html"],
       "matches": ["<all_urls>"]
     }
   ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],

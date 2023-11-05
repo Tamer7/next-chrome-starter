@@ -10,13 +10,17 @@
     "48": "/icons/icon48.png",
     "192": "/icons/icon192.png"
   },
-  "permissions": [],
+  "permissions": ["sidePanel", "tabs"],
   "web_accessible_resources": [
     {
       "resources": ["index.html"],
       "matches": ["<all_urls>"]
     }
   ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],
