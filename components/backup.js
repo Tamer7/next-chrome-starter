@@ -23,10 +23,7 @@ import AddIcon from "@mui/icons-material/Add";
 import TextField from "@mui/material/TextField";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import TabList from "./TabList";
-import ClusterList from "./ClusterList";
-import TabDialog from "./TabDialog";
-import DuplicateTabList from "./DuplicateTabList";
+import TabDialog from './TabDialog';
 
 
 // ... other imports
@@ -452,14 +449,72 @@ export default function Sidebar() {
                 tab={selectedTab || {}}
                 onClose={handleCloseDialog}
               />
-
-              <TabList
-                tabs={tabs}
-                selectedTab={selectedTab}
-                setSelectedTab={setSelectedTab}
-                handleCloseTab={handleCloseTab}
-                // other props you might need to pass down
-              />
+              <Droppable droppableId="droppableTabs">
+                {(provided) => (
+                  <List
+                    component="div"
+                    disablePadding
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    sx={{ pl: 4 }}
+                  >
+                    {tabs.map((tab, index) => (
+                      <Draggable
+                        key={tab.id}
+                        draggableId={String(tab.id)}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <ListItem
+                            button
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            onClick={() => setSelectedTab(tab)}
+                            secondaryAction={
+                              <>
+                                <IconButton
+                                  edge="end"
+                                  aria-label="view tab"
+                                  onClick={() =>
+                                    chrome.tabs.update(tab.id, { active: true })
+                                  }
+                                  size="small"
+                                >
+                                  <VisibilityIcon fontSize="small" />
+                                </IconButton>
+                                <IconButton
+                                  edge="end"
+                                  aria-label="close tab"
+                                  onClick={() => handleCloseTab(tab.id)}
+                                  size="small"
+                                >
+                                  <CloseIcon fontSize="small" />
+                                </IconButton>
+                              </>
+                            }
+                            sx={{ paddingLeft: 2, paddingRight: 2 }}
+                          >
+                            <ListItemIcon sx={{ minWidth: 30, cursor: "grab" }}>
+                              {" "}
+                              <img
+                                src={tab.favIconUrl || "default-icon.png"}
+                                alt={`${tab.title} icon`}
+                                style={{ width: 16, height: 16 }}
+                              />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={truncateText(tab.title, 12)}
+                              sx={{ margin: 0 }}
+                            />
+                          </ListItem>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </List>
+                )}
+              </Droppable>
             </Collapse>
 
             <ListItem button onClick={() => handleClickListItem("explore")}>
@@ -475,15 +530,90 @@ export default function Sidebar() {
               unmountOnExit
             >
               <List component="div" disablePadding>
-                <ClusterList
-                  clusters={clusters}
-                  openClusters={openClusters}
-                  handleToggleCluster={handleToggleCluster}
-                  handleDeleteCluster={handleDeleteCluster}
-                  newClusterName={newClusterName}
-                  setNewClusterName={setNewClusterName}
-                  addNewCluster={addNewCluster}
-                />
+                {clusters.map((cluster) => (
+                  <React.Fragment key={cluster.id}>
+                    <ListItem
+                      button
+                      onClick={() => handleToggleCluster(cluster.id)}
+                      sx={{ pl: 4 }}
+                    >
+                      <ListItemText primary={cluster.name} />
+                      {openClusters[cluster.id] ? (
+                        <ExpandLess />
+                      ) : (
+                        <ExpandMore />
+                      )}
+
+                      <Droppable droppableId={`cluster-${cluster.id}`}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            style={{
+                              backgroundColor: snapshot.isDraggingOver
+                                ? "lightblue"
+                                : "grey",
+                            }}
+                          >
+                            {cluster.tabs.map((tab, index) => (
+                              <Draggable
+                                key={tab.id}
+                                draggableId={tab.id}
+                                index={index}
+                              >
+                                {(provided) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                  >
+                                    {/* content of your tab */}
+                                    {tab.content}
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleDeleteCluster(cluster.id);
+                        }}
+                        size="small"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </ListItem>
+                    <Collapse
+                      in={openClusters[cluster.id]}
+                      timeout="auto"
+                      unmountOnExit
+                    ></Collapse>
+                  </React.Fragment>
+                ))}
+                <ListItem sx={{ pl: 4 }}>
+                  <TextField
+                    size="small"
+                    value={newClusterName}
+                    onChange={(e) => setNewClusterName(e.target.value)}
+                    placeholder="New cluster name"
+                    variant="outlined"
+                    sx={{ marginRight: 1 }}
+                  />
+                  <IconButton
+                    onClick={addNewCluster}
+                    edge="end"
+                    aria-label="add"
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </ListItem>
               </List>
             </Collapse>
             <ListItem

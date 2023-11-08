@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tabhive",
-  "short_name": "N-C-S",
+  "short_name": "Tabhive",
   "version": "0.0.1",
   "description": "Tab manager for your browser",
   "icons": {
@@ -10,7 +10,7 @@
     "48": "/icons/icon48.png",
     "192": "/icons/icon192.png"
   },
-  "permissions": ["sidePanel", "tabs"],
+  "permissions": ["sidePanel", "tabs", "storage"],
   "web_accessible_resources": [
     {
       "resources": ["index.html"],
